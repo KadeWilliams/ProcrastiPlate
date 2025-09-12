@@ -1,0 +1,18 @@
+﻿services:
+  procrastiplate.api:
+    image: ${DOCKER_REGISTRY}procrastiplate.api
+    build:
+      context: .
+      dockerfile: ProcrastiPlate.API/Dockerfile
+    ports:
+        - "5002:5002"
+        - "5003:5003"
+  procrastiplate.database:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=procrastiplate
+      - POSTGRES_USER=procrastiplateuser
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5432:5432"
+
