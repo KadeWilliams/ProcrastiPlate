@@ -1,10 +1,15 @@
 using Microsoft.OpenApi.Models;
+using ProcrastiPlate.API.Repositories;
+using ProcrastiPlate.API.Repositories.Interfaces;
+using ProcrastiPlate.API.Services;
+using ProcrastiPlate.API.Services.Interface;
+using ProcrastiPlate.Server.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("Database") ?? throw new InvalidOperationException("Connection string 'Database' not found.");
-
+builder.Services.AddSingleton<IDbConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -26,6 +31,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddTransient<IProcrastiPlateService, ProcrastiPlateService>();
+builder.Services.AddTransient<IProcrastiPlateRepository, ProcrastiPlateRepository>();
 
 var app = builder.Build();
 
