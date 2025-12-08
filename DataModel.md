@@ -6,7 +6,7 @@ Book ||--o{ Recipe : "contains"
 DishType ||--o{ Recipe : "is of"
 Season ||--o{ Ingredient : "is within"
 CuisineType ||--o{ Book : "is of"
-Ingredient ||--o{ Ingredient : "substitutes"
+Ingredient ||--o{ IngredientSubstitute : "substitutes"
 Ingredient ||--o{ RecipeIngredient : "is on"
 Recipe ||--o{ RecipeIngredient : "has"
 UnitType ||--o{ RecipeIngredient : "is in"
@@ -87,12 +87,16 @@ Recipe {
 }
 Ingredient {
 	int IngredientId
-	int SubstituteIngredientId
 	int SeasonCd
 	string Name
 	varbinary IngredientImage
 	bit IsExotic
 	bit IsParishable
+}
+IngredientSubstitute {
+	int IngredientId
+	int SubstituteIngredientId
+	string Notes
 }
 RecipeIngredient {
 	int RecipeId
