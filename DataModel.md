@@ -28,6 +28,8 @@ BookReview ||--o{ User : "has"
 Pantry ||--o{ User : "has"
 PantryIngredient ||--o{ Ingredient : "has"
 UnitType ||--o{ PantryIngredient : "is"
+User ||--o{ RecipeCookingHistory : "has"
+Recipe ||--o{ RecipeCookingHistory : "has"
 
 
 %% Reference Tables %%
@@ -185,5 +187,13 @@ PantryIngredient {
 	decimal Quantity
 	string UnitTypeCd
 	date ExpirationDate
+}
+RecipeCookingHistory {
+	int CookingHistoryId
+	int RecipeId
+    int UserId
+	date CookedOn
+    string Notes
+    int Rating
 }
 ```
