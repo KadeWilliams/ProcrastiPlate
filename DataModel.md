@@ -85,6 +85,16 @@ Recipe {
 	date CookedOn
 	string Occasion
 }
+RecipeStep {
+	int RecipeStepId
+	int RecipeId
+	int StepNumber
+	string Instruction
+	int DurationMinutes 
+	int Temperature
+	string TemperatureUnit
+	varbinary StepImage  
+}
 Ingredient {
 	int IngredientId
 	int SeasonCd
