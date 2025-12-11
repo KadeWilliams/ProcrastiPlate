@@ -4,8 +4,8 @@
     {
         public int RecipeId { get; set; }
         public int UserId { get; set; }
-        public string Name { get; set; }
-        public string? Description { get; set; }
+        public string RecipeName { get; set; }
+        public string? RecipeDescription { get; set; }
         public int? PrepTimeMinutes { get; set; }
         public int? CookTimeMinutes { get; set; }
         public int? Servings { get; set; }

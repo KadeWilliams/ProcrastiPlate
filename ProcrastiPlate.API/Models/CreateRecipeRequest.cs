@@ -3,8 +3,8 @@ namespace ProcrastiPlate.Api.Models.DTOs;
 // todo: create a new class for creating new recipe steps
 public class CreateRecipeRequest
 {
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
+    public string RecipeName { get; set; } = string.Empty;
+    public string? RecipeDescription { get; set; }
     public int? PrepTimeMinutes { get; set; }
     public int? CookTimeMinutes { get; set; }
     public int? Servings { get; set; }
@@ -22,8 +22,8 @@ public class CreateRecipeIngredientRequest
 
 public class UpdateRecipeRequest
 {
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
+    public string RecipeName { get; set; } = string.Empty;
+    public string? RecipeDescription { get; set; }
     public int? PrepTimeMinutes { get; set; }
     public int? CookTimeMinutes { get; set; }
     public int? Servings { get; set; }

@@ -83,8 +83,8 @@ public class RecipeRepository : IRecipeRepository
                     new
                     {
                         UserId = userId,
-                        request.Name,
-                        request.Description,
+                        request.RecipeName,
+                        request.RecipeDescription,
                         request.PrepTimeMinutes,
                         request.CookTimeMinutes,
                         request.Servings
@@ -135,8 +135,8 @@ public class RecipeRepository : IRecipeRepository
                 new
                 {
                     UserId = userId,
-                    request.Name,
-                    request.Description,
+                    request.RecipeName,
+                    request.RecipeDescription,
                     request.PrepTimeMinutes,
                     request.CookTimeMinutes,
                     request.Servings

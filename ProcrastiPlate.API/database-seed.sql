@@ -14,7 +14,7 @@ GRANT ALL ON SCHEMA reference TO public;
 
 CREATE TABLE reference.UnitType (
     UnitTypeCd varchar(20) Primary Key
-    , Description varchar(100) not null
+    , UnitDescription varchar(100) not null
 );
 
 -- Public/Main Tables
@@ -77,15 +77,15 @@ CREATE TABLE public.RecipeIngredient (
 
 -- Indexes for Performance 
 CREATE INDEX idx_RecipeUserId on Recipe(UserId);
-CREATE INDEX idx_RecipeName on Recipe(Name);
-CREATE INDEX idx_IngredientName on Ingredient(Name);
+CREATE INDEX idx_RecipeName on Recipe(RecipeName);
+CREATE INDEX idx_IngredientName on Ingredient(IngredientName);
 CREATE INDEX idx_RecipeIngredientRecipe on RecipeIngredient(RecipeId);
 CREATE INDEX idx_RecipeIngredientIngredient on RecipeIngredient(IngredientId);
 
 -- Seed Data for Quick Testing 
 
 -- Unit Types 
-INSERT INTO reference.UnitType (UnitTypeCd, Description)
+INSERT INTO reference.UnitType (UnitTypeCd, UnitDescription)
 VALUES 
 ('CUP', 'Cup'),
 ('TBSP', 'Tablespoon'),
@@ -111,9 +111,9 @@ VALUES
 ('Test', 'User', 'testuser', 'test@example.com', decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex'), decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex'));
 
 -- Sample Ingredients
-INSERT INTO Ingredient (Name, IsExotic, IsPerishable)
+INSERT INTO Ingredient (IngredientName, IsExotic, IsPerishable)
 VALUES
-('spaghetti', FALSE, FALSE),
+('Spaghetti', FALSE, FALSE),
 ('All-Purpose Flour', FALSE, FALSE),
 ('Sugar', FALSE, FALSE),
 ('Salt', FALSE, FALSE),
@@ -131,7 +131,7 @@ VALUES
 ('Parmesan Cheese', FALSE, TRUE);
 
 -- Sample Recipe
-INSERT INTO Recipe (UserId, Name, Description, PrepTimeMinutes, CookTimeMinutes, Servings) 
+INSERT INTO Recipe (UserId, RecipeName, RecipeDescription, PrepTimeMinutes, CookTimeMinutes, Servings) 
 VALUES
 (1, 'Simple Pasta Aglio e Olio', 
 'A classic italian pasta dish with garlic and olive oil',
