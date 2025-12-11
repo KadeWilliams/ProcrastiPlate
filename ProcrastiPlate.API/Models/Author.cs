@@ -1,4 +1,4 @@
-namespace ProcrastiPlate.API.Models;
+namespace ProcrastiPlate.Api.Models;
 
 public class Author
 {

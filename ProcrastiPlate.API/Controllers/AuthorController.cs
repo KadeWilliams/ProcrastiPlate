@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 // using Microsoft.IdentityModel.Tokens;
-using ProcrastiPlate.API.Services.Interface;
+using ProcrastiPlate.Api.Services.Interface;
 
-// using ProcrastiPlate.API.Services.Interfaces;
+// using ProcrastiPlate.Api.Services.Interfaces;
 
 namespace ProcrastiPlate.Server.Controllers
 {

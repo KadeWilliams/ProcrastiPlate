@@ -33,7 +33,7 @@ CREATE TABLE public.AppUser (
 
 CREATE TABLE public.Ingredient (
     IngredientId SERIAL Primary Key
-    , Name varchar(200) not null
+    , IngredientName varchar(200) not null
     , IsExotic BOOLEAN DEFAULT FALSE
     , IsPerishable BOOLEAN DEFAULT FALSE
     , CreateDttm timestamp default CURRENT_TIMESTAMP
@@ -42,35 +42,50 @@ CREATE TABLE public.Ingredient (
 
 CREATE TABLE public.Recipe (
     RecipeId SERIAL PRIMARY KEY
-    , UserId INT NOt NULL REFERENCES 
-    , Name varchar(300) not null
-    , Description text
+    , UserId INT NOt NULL REFERENCES AppUser(UserId)  
+    , RecipeName varchar(300) not null
+    , RecipeDescription text
     , PrepTimeMinutes int
     , CookTimeMinutes int
     , Servings int
-    , Instructions text 
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
+);
+
+CREATE TABLE public.RecipeStep (
+    RecipeStepId SERIAL PRIMARY KEY
+    , RecipeId INT not null REFERENCES Recipe(RecipeId)
+    , StepNumber int not null 
+    , Instruction text not null
+    , DurationMinutes int
+    , Temperature int 
+    , TemperatureUnit varchar(1)
+    , StepImage bytea
 );
 
 CREATE TABLE public.RecipeIngredient (
     RecipeId int not null references Recipe(RecipeId)
     , IngredientId int not null references Ingredient(IngredientId)
+    , UnitTypeCd varchar(20) not null references reference.UnitType(UnitTypeCd)
+    , Quantity decimal(10, 3) not null
+    , Notes varchar(500) -- e.g. "finely chopped", "to taste"
+    , DisplayOrder int DEFAULT 0
+    , PRIMARY KEY (RecipeId, IngredientId, UnitTypeCd)
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
 );
 
 -- Indexes for Performance 
-CREATE INDEX idx_RecipeUserId on Recipe(UserId)
-CREATE INDEX idx_RecipeName on Recipe(name);
-CREATE INDEX idx_IngredientName on Ingredient(name);
+CREATE INDEX idx_RecipeUserId on Recipe(UserId);
+CREATE INDEX idx_RecipeName on Recipe(Name);
+CREATE INDEX idx_IngredientName on Ingredient(Name);
 CREATE INDEX idx_RecipeIngredientRecipe on RecipeIngredient(RecipeId);
 CREATE INDEX idx_RecipeIngredientIngredient on RecipeIngredient(IngredientId);
 
 -- Seed Data for Quick Testing 
 
 -- Unit Types 
-INSERT INTO UnitType (UnitTypeCd, Description)
+INSERT INTO reference.UnitType (UnitTypeCd, Description)
 VALUES 
 ('CUP', 'Cup'),
 ('TBSP', 'Tablespoon'),
@@ -93,11 +108,12 @@ VALUES
 -- Just placeholder for now 
 INSERT INTO AppUser (FirstName, LastName, Username, Email, PasswordHash, PasswordSalt) 
 VALUES 
-('Test', 'User', 'testuser', 'test@example.com', decode('0', 'hex'), decode('0', 'hex'));
+('Test', 'User', 'testuser', 'test@example.com', decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex'), decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex'));
 
--- Same Ingredients
+-- Sample Ingredients
 INSERT INTO Ingredient (Name, IsExotic, IsPerishable)
 VALUES
+('spaghetti', FALSE, FALSE),
 ('All-Purpose Flour', FALSE, FALSE),
 ('Sugar', FALSE, FALSE),
 ('Salt', FALSE, FALSE),
@@ -115,13 +131,23 @@ VALUES
 ('Parmesan Cheese', FALSE, TRUE);
 
 -- Sample Recipe
-INSERT INTO Recipe (UserId, Name, Description, PrepTimeMinutes, CookTimeMinutes, Servings, Instructions) 
+INSERT INTO Recipe (UserId, Name, Description, PrepTimeMinutes, CookTimeMinutes, Servings) 
 VALUES
 (1, 'Simple Pasta Aglio e Olio', 
 'A classic italian pasta dish with garlic and olive oil',
-10, 15, 4,
-'1. Boil pasta according to package directions
-2. Saute garlic in olive oil until fragrant
-3. Toss pasta with garlic oil
-4. Add red pepper flakes and parsley
-5. Serve with parmesan cheese');
+10, 15, 4);
+
+INSERT INTO RecipeStep (RecipeId, StepNumber, Instruction, DurationMinutes, Temperature, TemperatureUnit, StepImage)
+VALUES 
+(1, 1, 'Boil pasta according to package directions', null, null, null, null),
+(1, 2, 'Saute garlic in olive oil until fragrant', null, null, null, null),
+(1, 3, 'Toss pasta with garlic oil', null, null, null, null),
+(1, 4, 'Add red pepper flakes and parsley', null, null, null, null),
+(1, 5, 'Serve with parmesan cheese', null, null, null, null);
+
+INSERT INTO RecipeIngredient (RecipeId, IngredientId, UnitTypeCd, Quantity, Notes, DisplayOrder)
+VALUES
+(1,1,'LB', 1, null, 1),
+(1,6,'CUP', 0.5, null, 2),
+(1,10,'CLOVE', 6.0, 'thinly sliced', 3),
+(1,4,'TASTE', 6.0, 'thinly sliced', 3);

@@ -1,4 +1,4 @@
-namespace ProcrastiPlate.API;
+namespace ProcrastiPlate.Api;
 
 public class WeatherForecast
 {

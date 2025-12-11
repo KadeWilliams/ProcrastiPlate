@@ -1,14 +1,13 @@
 using Dapper;
-using ProcrastiPlate.Server.Configuration;
-using ProcrastiPlate.API.Models;
-using ProcrastiPlate.API.Repositories.Interfaces;
+using ProcrastiPlate.Api.Models;
+using ProcrastiPlate.Api.Repositories.Interfaces;
 using ProcrastiPlate.Server.Configuration;
 
-namespace ProcrastiPlate.API.Repositories;
+namespace ProcrastiPlate.Api.Repositories;
 
 public class ProcrastiPlateRepository : IProcrastiPlateRepository
 {
-    private readonly IDbConnectionFactory _connection; 
+    private readonly IDbConnectionFactory _connection;
     public ProcrastiPlateRepository(IDbConnectionFactory connection)
     {
         _connection = connection;
@@ -22,4 +21,15 @@ public class ProcrastiPlateRepository : IProcrastiPlateRepository
             new { AuthorId = id }
         );
     }
+    //public async Task<IEnumerable<Recipe>> GetAllRecipesAsync(int userId)
+    //{
+    //    using var conn = _connection.GetConnection();
+    //    return conn.QueryAsync<Author>(
+    //@"SELECT * 
+    //FROM Recipe 
+    //WHERE UserId = @UserId 
+    //ORDER BY CreateDttm DESC",
+    //        new { UserId = userId }
+    //    );
+    //}
 }

@@ -1,6 +1,6 @@
-using ProcrastiPlate.API.Models;
+using ProcrastiPlate.Api.Models;
 
-namespace ProcrastiPlate.API.Services.Interface;
+namespace ProcrastiPlate.Api.Services.Interface;
 
 public interface IProcrastiPlateService
 {

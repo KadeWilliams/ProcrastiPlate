@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace ProcrastiPlate.API.Controllers;
+namespace ProcrastiPlate.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]

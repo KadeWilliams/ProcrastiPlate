@@ -9,6 +9,7 @@ This is also the first time I've ever developed a .NET application using MacOS a
 But I was able to get it to work by shear will.
 
 just for when I inevitably forget the URL and port for the swagger and api https://localhost:5002/swagger/index.html
+just for when I inevitably forget the URL and port for the swagger and api https://localhost:5148/swagger/index.html
 
 Todo:
 - [ ] Document what I did to get it working 
@@ -16,3 +17,9 @@ Todo:
 - [ ] Build the landing page for the user. 
 - [ ] Basic authentication however that might be 
 - [ ] Show a users saved things
+
+To get the docker container running for the database:
+`docker run --name procrastiplate-postgres -e POSTGRES_DB=procrastiplate -e POSTGRES_USER=procrastiplateuser -e POSTGRES_PASSWORD=1234 -p 5432:5432 -v procrastiplate-data:/var/lib/postgresql/data -d postgres:16`
+
+To get the database seeded with test data:
+`docker exec -i procrastiplate-postgres psql -U procrastiplateuser -d procrastiplate < database-seed.sql`

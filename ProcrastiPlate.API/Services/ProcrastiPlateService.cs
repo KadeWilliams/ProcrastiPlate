@@ -1,8 +1,8 @@
-using ProcrastiPlate.API.Models;
-using ProcrastiPlate.API.Repositories.Interfaces;
-using ProcrastiPlate.API.Services.Interface;
+using ProcrastiPlate.Api.Models;
+using ProcrastiPlate.Api.Repositories.Interfaces;
+using ProcrastiPlate.Api.Services.Interface;
 
-namespace ProcrastiPlate.API.Services;
+namespace ProcrastiPlate.Api.Services;
 public class ProcrastiPlateService : IProcrastiPlateService
 {
     private readonly IProcrastiPlateRepository _repo;

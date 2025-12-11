@@ -1,8 +1,8 @@
-using ProcrastiPlate.API.Models;
+using ProcrastiPlate.Api.Models;
 
-namespace ProcrastiPlate.API.Repositories.Interfaces;
+namespace ProcrastiPlate.Api.Repositories.Interfaces;
 
 public interface IProcrastiPlateRepository
 {
-    Author GetAuthor(int id); 
+    Author GetAuthor(int id);
 }

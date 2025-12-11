@@ -3,7 +3,7 @@
     image: ${DOCKER_REGISTRY}procrastiplate.api
     build:
       context: .
-      dockerfile: ProcrastiPlate.API/Dockerfile
+      dockerfile: ProcrastiPlate.Api/Dockerfile
     ports:
         - "5002:5002"
         - "5003:5003"
