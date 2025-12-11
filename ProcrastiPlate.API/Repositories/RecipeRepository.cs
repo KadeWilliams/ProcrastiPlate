@@ -125,13 +125,13 @@ public class RecipeRepository : IRecipeRepository
         {
             var rowsAffected = await conn.ExecuteAsync(
                 @"UPDATE recipe 
-              SET UserId = @UserId
-                  , Name = @Name
-                  , Description = @Description
+                  SET UserId = @UserId
+                  , RecipeName = @RecipeName
+                  , RecipeDescription = @RecipeDescription
                   , PrepTimeMinutes = @PrepTimeMinutes
                   , CookTimeMinutes = @CookTimeMinutes
                   , Servings = @Servings
-              WHERE RecipeId = @RecipeId AND UserId = @UserId",
+                  WHERE RecipeId = @RecipeId AND UserId = @UserId",
                 new
                 {
                     UserId = userId,
