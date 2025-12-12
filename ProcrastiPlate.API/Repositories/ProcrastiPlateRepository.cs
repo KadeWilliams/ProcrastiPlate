@@ -1,5 +1,5 @@
 using Dapper;
-using ProcrastiPlate.Api.Models;
+using ProcrastiPlate.Core.Models;
 using ProcrastiPlate.Api.Repositories.Interfaces;
 using ProcrastiPlate.Server.Configuration;
 

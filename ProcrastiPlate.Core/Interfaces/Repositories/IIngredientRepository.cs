@@ -1,7 +1,7 @@
 using ProcrastiPlate.Core.Models;
 using ProcrastiPlate.Api.Models.DTOs;
 
-namespace ProcrastiPlate.Api.Repositories;
+namespace ProcrastiPlate.Core.Interfaces.Repositories;
 
 public interface IIngredientRepository
 {

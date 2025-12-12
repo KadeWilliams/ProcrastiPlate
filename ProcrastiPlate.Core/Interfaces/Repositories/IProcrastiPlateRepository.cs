@@ -1,6 +1,6 @@
 using ProcrastiPlate.Core.Models;
 
-namespace ProcrastiPlate.Api.Repositories.Interfaces;
+namespace ProcrastiPlate.Core.Interfaces.Repositories;
 
 public interface IProcrastiPlateRepository
 {

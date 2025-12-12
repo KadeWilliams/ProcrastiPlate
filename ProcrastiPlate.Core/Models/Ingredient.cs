@@ -1,4 +1,4 @@
-namespace ProcrastiPlate.Api.Models;
+namespace ProcrastiPlate.Core.Models;
 
 public class Ingredient
 {
@@ -8,4 +8,7 @@ public class Ingredient
     public bool IsPerishable { get; set; }
     public DateTime CreateDttm { get; set; }
     public DateTime UpdateDttm { get; set; }
+
+    // Navigation properties 
+    public IEnumerable<RecipeIngredient>? RecipeIngredients { get; set; }
 }

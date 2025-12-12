@@ -25,8 +25,10 @@ CREATE TABLE public.AppUser (
     , LastName varchar(100) not null
     , Username varchar(50) not null unique
     , Email varchar(255) not null unique
-    , PasswordHash bytea not null
-    , PasswordSalt bytea not null
+    , GoogleId varchar(255)
+    , AppleId varchar(255)
+    , PasswordHash bytea 
+    , PasswordSalt bytea
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
 );
@@ -36,6 +38,7 @@ CREATE TABLE public.Ingredient (
     , IngredientName varchar(200) not null
     , IsExotic BOOLEAN DEFAULT FALSE
     , IsPerishable BOOLEAN DEFAULT FALSE
+    , IngredientImage bytea 
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
 );
@@ -48,6 +51,7 @@ CREATE TABLE public.Recipe (
     , PrepTimeMinutes int
     , CookTimeMinutes int
     , Servings int
+    , RecipeImage bytea 
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
 );

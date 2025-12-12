@@ -1,4 +1,4 @@
-﻿namespace ProcrastiPlate.Api.Models
+﻿namespace ProcrastiPlate.Core.Models
 {
     public class Recipe
     {
@@ -13,6 +13,13 @@
         public DateTime CreatedDttm { get; set; }
         public DateTime UpdatedDttm { get; set; }
 
-        public IEnumerable<RecipeIngredientDetail>? Ingredients { get; set; }
+        // Navigation properties 
+        public User User { get; set; } = null!;
+        public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
+        public IEnumerable<RecipeStep> RecipeSteps { get; set; } = new List<RecipeStep>();
+
+        // Computed properties
+        public int TotalTimeMinutes => (PrepTimeMinutes ?? 0) + (CookTimeMinutes ?? 0);
+        public bool HasSteps => RecipeSteps.Any();
     }
 }

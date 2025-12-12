@@ -1,6 +1,6 @@
-namespace ProcrastiPlate.Api.Models;
+namespace ProcrastiPlate.Core.Models;
 
-public class User 
+public class User
 {
     public int UserId { get; set; }
     public string FirstName { get; set; } = string.Empty;
@@ -11,4 +11,10 @@ public class User
     public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
     public DateTime CreateDttm { get; set; }
     public DateTime UpdateDttm { get; set; }
+
+    // Navigation properties 
+    public IEnumerable<Recipe>? Recipes { get; set; }
+
+    // Computed Property
+    public string FullName => $"{FirstName} {LastName}";
 }
