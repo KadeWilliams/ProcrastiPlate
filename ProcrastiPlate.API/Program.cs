@@ -18,7 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Recipe Tracker Api", Version = "v0" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Procrasti Plate Api", Version = "v0" });
     //c.OperationFilter<CustomHeaderOperationFilter>();
 });
 builder.Services.AddCors(options =>
