@@ -15,8 +15,8 @@
 
         // Navigation properties 
         public User User { get; set; } = null!;
-        public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
-        public IEnumerable<RecipeStep> RecipeSteps { get; set; } = new List<RecipeStep>();
+        public List<RecipeIngredient> RecipeIngredients { get; set; } = new List<RecipeIngredient>();
+        public List<RecipeStep> RecipeSteps { get; set; } = new List<RecipeStep>();
 
         // Computed properties
         public int TotalTimeMinutes => (PrepTimeMinutes ?? 0) + (CookTimeMinutes ?? 0);

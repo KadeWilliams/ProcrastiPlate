@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProcrastiPlate.API", "ProcrastiPlate.API\ProcrastiPlate.API.csproj", "{F0697C53-15DB-4408-A6B3-24CF15E4157D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57E85EC4-5004-4D5C-99C1-70A52ACA576D} = {57E85EC4-5004-4D5C-99C1-70A52ACA576D}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{580DC9C0-AB08-4FBC-B464-F65501CBABD7}"
 	ProjectSection(SolutionItems) = preProject

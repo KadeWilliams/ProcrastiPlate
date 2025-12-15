@@ -1,11 +1,11 @@
 using Microsoft.OpenApi.Models;
 using ProcrastiPlate.Api.Repositories;
-using ProcrastiPlate.Api.Repositories.Interfaces;
-using ProcrastiPlate.Api.Services;
-using ProcrastiPlate.Api.Services.Interface;
-using ProcrastiPlate.Server.Configuration;
+using ProcrastiPlate.Core.Configuration;
+using ProcrastiPlate.Core.Interfaces.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+IConfiguration configuration = builder.Configuration;
 
 // Add services to the container.
 var connectionString =
@@ -32,8 +32,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
-builder.Services.AddTransient<IProcrastiPlateService, ProcrastiPlateService>();
-builder.Services.AddTransient<IProcrastiPlateRepository, ProcrastiPlateRepository>();
 builder.Services.AddTransient<IRecipeRepository, RecipeRepository>();
 
 var app = builder.Build();

@@ -1,6 +1,6 @@
-using System.Data;
 using Npgsql;
-namespace ProcrastiPlate.Server.Configuration;
+using System.Data;
+namespace ProcrastiPlate.Core.Configuration;
 public interface IDbConnectionFactory
 {
     IDbConnection GetConnection();

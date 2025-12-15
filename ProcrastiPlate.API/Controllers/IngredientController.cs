@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ProcrastiPlate.Core.Models;
-using ProcrastiPlate.Api.Models.DTOs;
-using ProcrastiPlate.Api.Repositories;
+using ProcrastiPlate.Core.Interfaces.Repositories;
 
 namespace ProcrastiPlate.Api.Controllers;
 

@@ -1,4 +1,6 @@
-﻿namespace ProcrastiPlate.Contracts.Recipes;
+﻿using ProcrastiPlate.Contracts.Users;
+
+namespace ProcrastiPlate.Contracts.Recipes;
 
 public record RecipeDetailResponse
 (

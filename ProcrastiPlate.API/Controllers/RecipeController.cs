@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProcrastiPlate.Contracts.Recipes;
+using ProcrastiPlate.Core.Interfaces.Repositories;
+using ProcrastiPlate.Core.Interfaces.Services;
 using ProcrastiPlate.Core.Models;
-using ProcrastiPlate.Api.Models.DTOs;
-using ProcrastiPlate.Api.Repositories.Interfaces;
 
 namespace ProcrastiPlate.Api.Controllers;
 
@@ -10,11 +12,17 @@ namespace ProcrastiPlate.Api.Controllers;
 public class RecipesController : ControllerBase
 {
     private readonly IRecipeRepository _recipeRepository;
+    private readonly IRecipeService _recipeService;
     private readonly ILogger<RecipesController> _logger;
 
-    public RecipesController(IRecipeRepository recipeRepository, ILogger<RecipesController> logger)
+    public RecipesController(
+        IRecipeRepository recipeRepository,
+        IRecipeService recipeService,
+        ILogger<RecipesController> logger
+    )
     {
         _recipeRepository = recipeRepository;
+        _recipeService = recipeService;
         _logger = logger;
     }
 
@@ -29,7 +37,7 @@ public class RecipesController : ControllerBase
 
             var userId = 1;
 
-            var recipes = await _recipeRepository.GetAllRecipesAsync(userId);
+            var recipes = await _recipeRepository.GetAllRecipesByUserIdAsync(userId);
             return Ok(recipes);
         }
         catch (Exception ex)
@@ -48,7 +56,7 @@ public class RecipesController : ControllerBase
             // TODO: Get real user ID from auth token
             var userId = 1;
 
-            var recipe = await _recipeRepository.GetRecipeByIdAsync(recipeId, userId);
+            var recipe = await _recipeRepository.GetByIdAsync(recipeId, userId);
             if (recipe == null)
             {
                 return NotFound($"Recipe with ID {recipeId} not found");
@@ -58,14 +66,27 @@ public class RecipesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving recipe {RecipeID}", recipeId);
-            return StatusCode(500, "An error occurred while retrieving recipe");
+            return StatusCode(500, $"An error occurred while retrieving recipe");
         }
     }
 
     // POST: api/recipes
+    /// <summary>
+    /// Create a new recipe
+    /// </summary>
     [HttpPost]
-    public async Task<ActionResult<Recipe>> CreateRecipe([FromBody] CreateRecipeRequest request)
+    [Authorize]
+    [ProducesResponseType(typeof(RecipeDetailResponse), StatusCodes.Status201Created)]
+    public async Task<ActionResult<RecipeDetailResponse>> CreateRecipe([FromBody] CreateRecipeRequest request)
     {
+        /*
+            What happens here:
+            1. ASP.NET checks JWT token (due to [Authorize])
+            2. If token is valid, creates User.Claims with userId, email, etc.
+            3. Deserializes JSON body into CreateRecipeRequest object
+            4. Validates data annotations ([Required], [MaxLength], etc.)
+        */
+
         try
         {
             if (!ModelState.IsValid)
@@ -74,9 +95,14 @@ public class RecipesController : ControllerBase
             }
 
             // TODO: Get real user ID from auth token
+            // Extract user ID from JWT token
+            // var userId = User.GetUserId(); // from claims: "123"
             var userId = 1;
 
-            var recipe = await _recipeRepository.CreateRecipeAsync(request, userId);
+            // pass to service layer - we're NOT dealing with HTTP stuff 
+            var recipe = await _recipeService.CreateRecipeAsync(request, userId);
+
+            // return HTTP 201 with Created location header
             return CreatedAtAction(nameof(GetRecipe), new { id = recipe.RecipeId }, recipe);
         }
         catch (Exception ex)
@@ -103,7 +129,7 @@ public class RecipesController : ControllerBase
             // TODO: Get real user ID from auth token
             var userId = 1;
 
-            var success = await _recipeRepository.UpdateRecipeAsync(recipeId, request, userId);
+            var success = await _recipeService.UpdateRecipeAsync(request, userId);
 
             if (!success)
             {
