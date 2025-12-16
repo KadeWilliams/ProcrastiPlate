@@ -15,7 +15,7 @@ public class RecipeRepository : IRecipeRepository
         _connection = connection;
     }
 
-    public async Task<IEnumerable<Recipe>> GetAllByUserIdAsync(int userId)
+    public async Task<IEnumerable<Recipe>> GetAllByIdAsync(int userId)
     {
         using (var conn = _connection.GetConnection())
         {
@@ -28,7 +28,6 @@ public class RecipeRepository : IRecipeRepository
             );
         }
     }
-
     public async Task<Recipe?> GetByIdAsync(int recipeId, int userId, bool includeSteps = false)
     {
         using (var conn = _connection.GetConnection())
@@ -124,7 +123,6 @@ public class RecipeRepository : IRecipeRepository
             return result;
         }
     }
-
     public async Task<Recipe> CreateAsync(Recipe recipe, int userId)
     {
         using (var conn = _connection.GetConnection())
@@ -174,23 +172,24 @@ public class RecipeRepository : IRecipeRepository
             }
         }
     }
-
     public async Task<bool> UpdateAsync(int recipeId, UpdateRecipeRequest request, int userId)
     {
         using (var conn = _connection.GetConnection())
         {
-            var rowsAffected = await conn.ExecuteAsync(
-                @"UPDATE recipe 
-                  SET UserId = @UserId
-                  , RecipeName = @RecipeName
+            const string updateRecipeSQL = @"UPDATE recipe 
+                  SET RecipeName = @RecipeName
                   , RecipeDescription = @RecipeDescription
                   , PrepTimeMinutes = @PrepTimeMinutes
                   , CookTimeMinutes = @CookTimeMinutes
                   , Servings = @Servings
-                  WHERE RecipeId = @RecipeId AND UserId = @UserId",
+                  WHERE RecipeId = @RecipeId AND UserId = @UserId";
+
+            var rowsAffected = await conn.ExecuteAsync(
+                updateRecipeSQL,
                 new
                 {
                     UserId = userId,
+                    RecipeId = recipeId,
                     request.RecipeName,
                     request.RecipeDescription,
                     request.PrepTimeMinutes,
@@ -199,35 +198,113 @@ public class RecipeRepository : IRecipeRepository
                 }
             );
 
+            if (request.Ingredients?.Any() == true)
+            {
+                const string ingredientsSQL = @"
+                    UPDATE RecipeIngredient
+                    SET   
+                        UnitTypeCd = @UnitTypeCd
+                        , Quantity = @Quantity
+                        , Notes = @Notes
+                        , DisplayOrder = @DisplayOrder
+                    WHERE RecipeId = @RecipeId AND IngredientId = @IngredientId";
+
+
+                foreach (var ingredient in request.Ingredients)
+                {
+                    await conn.ExecuteAsync(
+                        ingredientsSQL,
+                        new
+                        {
+                            RecipeId = recipeId,
+                            ingredient.IngredientId,
+                            ingredient.UnitTypeCd,
+                            ingredient.Quantity,
+                            ingredient.Notes,
+                            ingredient.DisplayOrder
+                        }
+                    );
+                }
+            }
+
+            if (request.Steps?.Any() == true)
+            {
+                const string stepsSQL = @"
+                    UPDATE RecipeStep 
+                    SET   
+                    WHERE RecipeId = @RecipeId";
+
+
+                foreach (var steps in request.Steps)
+                {
+                    await conn.ExecuteAsync(
+                        stepsSQL,
+                        new
+                        {
+
+                        }
+                    );
+                }
+
+            }
+
             return rowsAffected > 0;
         }
     }
-
-    public async Task<bool> DeleteAsync(int recipeId, int userId)
+    public async Task<bool> DeleteRecipeAsync(int recipeId, int userId)
     {
         using (var conn = _connection.GetConnection())
         {
+            const string deleteRecipeSQL = @"
+                DELETE FROM Recipe
+                WHERE RecipeId = @RecipeId AND UserId = @UserId";
+
             var rowsAffected = await conn.ExecuteAsync(
-                @"
-            DELETE FROM Recipe
-            WHERE RecipeId = @RecipeId AND UserId = @UserId",
+                deleteRecipeSQL,
                 new { RecipeId = recipeId, UserId = userId }
             );
 
             return rowsAffected > 0;
         }
     }
+    public async Task<bool> DeleteRecipeIngredientAsync(int recipeId, int ingredientId)
+    {
+        using (var conn = _connection.GetConnection())
+        {
+            const string deleteRecipeIngredientSQL = @"
+                DELETE FROM RecipeIngredient
+                WHERE RecipeId = @RecipeId AND IngredientId = @IngredientId";
 
+            var rowsAffected = await conn.ExecuteAsync(
+                deleteRecipeIngredientSQL,
+                new { RecipeId = recipeId, IngredientId = ingredientId }
+            );
+            return rowsAffected > 0;
+        }
+    }
+    public async Task<bool> DeleteRecipeStepAsync(int recipeId, int recipeStepId)
+    {
+        using (var conn = _connection.GetConnection())
+        {
+            const string deleteRecipeStepSQL = @"
+                DELETE FROM RecipeStep 
+                WHERE RecipeId = @RecipeId AND RecipeStepId = @RecipeStepId";
+
+            var rowsAffected = await conn.ExecuteAsync(
+                deleteRecipeStepSQL,
+                new { RecipeId = recipeId, RecipeStepId = recipeStepId }
+            );
+            return rowsAffected > 0;
+        }
+    }
     public Task<int> GetTotalCountAsync()
     {
         throw new NotImplementedException();
     }
-
     public Task<int> GetCountByUserAsync(int userId)
     {
         throw new NotImplementedException();
     }
-
     public Task<IEnumerable<Recipe>> SearchAsync(string searchTerm, int page, int pageSize)
     {
         throw new NotImplementedException();

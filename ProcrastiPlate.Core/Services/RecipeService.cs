@@ -11,8 +11,6 @@ namespace ProcrastiPlate.Core.Services;
 public class RecipeService : IRecipeService
 {
     private readonly IRecipeRepository _recipeRepository;
-
-
     private readonly ILogger<RecipeService> _logger;
 
     public RecipeService(IRecipeRepository recipeRepository, ILogger<RecipeService> logger)
@@ -21,50 +19,15 @@ public class RecipeService : IRecipeService
         _logger = logger;
     }
 
-    public async Task<RecipeListReponse> GetAllRecipesByUserIdAsync(int userId)
+    public async Task<IEnumerable<RecipeListResponse>> GetRecipesListByUserIdAsync(int userId)
     {
-        var recipe = await _recipeRepository.GetAllRecipesByUserIdAsync(userId);
+        var recipe = await _recipeRepository.GetAllByIdAsync(userId);
 
         if (recipe == null)
             return null;
 
-        return await MapToDetailResponseAsync(recipe);
+        return MapToListResponseAsync(recipe);
     }
-
-
-    private RecipeDetailResponse MapToDetailResponseAsync(Recipe recipe)
-    {
-        return new RecipeDetailResponse(
-            recipe.RecipeId,
-            recipe.RecipeName,
-            recipe.RecipeDescription,
-            recipe.PrepTimeMinutes,
-            recipe.CookTimeMinutes,
-            recipe.TotalTimeMinutes,
-            recipe.Servings,
-            new UserSummaryResponse( // <== flatten user object
-                recipe.User.UserId,
-                recipe.User.Username,
-                recipe.User.FullName,
-                null
-            ),
-            recipe.RecipeIngredients.Select(ri => new RecipeIngredientResponse(
-                ri.IngredientId,
-                ri.Ingredient.IngredientName,
-                ri.Quantity,
-                ri.UnitTypeCd,
-                ri.UnitType.UnitTypeDescription,
-                ri.Notes,
-                ri.DisplayOrder,
-                ri.Ingredient.IsExotic,
-                ri.Ingredient.IsPerishable
-            )).ToList(),
-            new List<RecipeStepResponse>(), // empty for now
-            recipe.CreatedDttm,
-            recipe.UpdatedDttm
-        );
-    }
-
     public async Task<RecipeDetailResponse> CreateRecipeAsync(CreateRecipeRequest request, int userId)
     {
         // validation
@@ -105,8 +68,8 @@ public class RecipeService : IRecipeService
             UserId = userId,
 
             // from server
-            CreatedDttm = DateTime.UtcNow,
-            UpdatedDttm = DateTime.UtcNow
+            CreateDttm = DateTime.UtcNow,
+            UpdateDttm = DateTime.UtcNow
         };
 
         var createdRecipe = await _recipeRepository.CreateAsync(recipe, userId);
@@ -132,5 +95,72 @@ public class RecipeService : IRecipeService
         var completedRecipe = await _recipeRepository.GetByIdAsync(createdRecipe.RecipeId, userId, true);
 
         return MapToDetailResponseAsync(completedRecipe);
+    }
+    public async Task<RecipeDetailResponse> UpdateRecipeAsync(int recipeId, UpdateRecipeRequest request, int userId)
+    {
+        var success = await _recipeRepository.UpdateAsync(recipeId, request, userId);
+        if (success)
+        {
+            var updatedRecipe = await _recipeRepository.GetByIdAsync(recipeId, userId, true);
+            return MapToDetailResponseAsync(updatedRecipe);
+        }
+        return null;
+    }
+    public async Task<bool> DeleteRecipeAsync(int recipeId, int userId)
+    {
+        // todo figure out the best way to handle deletes for child relationship tables 
+        //var ingredientDeleteSuccess = _recipeRepository.DeleteRecipeIngredientAsync();
+        return await _recipeRepository.DeleteRecipeAsync(recipeId, userId);
+    }
+    private RecipeDetailResponse MapToDetailResponseAsync(Recipe? recipe)
+    {
+        return new RecipeDetailResponse(
+            recipe.RecipeId,
+            recipe.RecipeName,
+            recipe.RecipeDescription,
+            recipe.PrepTimeMinutes,
+            recipe.CookTimeMinutes,
+            recipe.TotalTimeMinutes,
+            recipe.Servings,
+            new UserSummaryResponse( // <== flatten user object
+                recipe.User.UserId,
+                recipe.User.Username,
+                recipe.User.FullName,
+                null
+            ),
+            recipe.RecipeIngredients.Select(ri => new RecipeIngredientResponse(
+                ri.IngredientId,
+                ri.Ingredient.IngredientName,
+                ri.Quantity,
+                ri.UnitTypeCd,
+                ri.UnitType.UnitTypeDescription,
+                ri.Notes,
+                ri.DisplayOrder,
+                ri.Ingredient.IsExotic,
+                ri.Ingredient.IsPerishable
+            )).ToList(),
+            new List<RecipeStepResponse>(), // empty for now
+            recipe.CreateDttm,
+            recipe.UpdateDttm
+        );
+    }
+    private List<RecipeListResponse> MapToListResponseAsync(IEnumerable<Recipe> recipes)
+    {
+        var recipeListResponse = new List<RecipeListResponse>();
+        foreach (var recipe in recipes)
+        {
+            var rec = new RecipeListResponse
+            (
+                recipe.RecipeId,
+                recipe.RecipeName,
+                recipe.RecipeDescription,
+                recipe.TotalTimeMinutes,
+                recipe.Servings,
+                recipe.RecipeIngredients.Count(),
+                recipe.CreateDttm
+            );
+            recipeListResponse.Add(rec);
+        }
+        return recipeListResponse;
     }
 }

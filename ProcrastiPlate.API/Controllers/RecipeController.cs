@@ -28,7 +28,7 @@ public class RecipesController : ControllerBase
 
     // GET: api/recipes
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipes()
+    public async Task<ActionResult<IEnumerable<RecipeListResponse>>> GetRecipes()
     {
         try
         {
@@ -37,7 +37,7 @@ public class RecipesController : ControllerBase
 
             var userId = 1;
 
-            var recipes = await _recipeRepository.GetAllRecipesByUserIdAsync(userId);
+            var recipes = await _recipeService.GetRecipesListByUserIdAsync(userId);
             return Ok(recipes);
         }
         catch (Exception ex)
@@ -114,7 +114,7 @@ public class RecipesController : ControllerBase
 
     // POST: api/recipes/5
     [HttpPut("{recipeId}")]
-    public async Task<ActionResult<Recipe>> UpdateRecipe(
+    public async Task<ActionResult<RecipeDetailResponse>> UpdateRecipe(
         int recipeId,
         [FromBody] UpdateRecipeRequest request
     )
@@ -129,14 +129,14 @@ public class RecipesController : ControllerBase
             // TODO: Get real user ID from auth token
             var userId = 1;
 
-            var success = await _recipeService.UpdateRecipeAsync(request, userId);
+            var response = await _recipeService.UpdateRecipeAsync(recipeId, request, userId);
 
-            if (!success)
+            if (response == null)
             {
                 return NotFound($"Recipe with ID {recipeId} not found");
             }
 
-            return NoContent();
+            return Ok(response);
         }
         catch (Exception ex)
         {
@@ -154,7 +154,8 @@ public class RecipesController : ControllerBase
             // TODO: Get real user ID from auth token
             var userId = 1;
 
-            var success = await _recipeRepository.DeleteRecipeAsync(recipeId, userId);
+            //var success = await _recipeRepository.DeleteAsync(recipeId, userId);
+            var success = true;
 
             if (!success)
             {

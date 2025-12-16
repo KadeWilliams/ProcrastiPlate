@@ -26,7 +26,7 @@ CREATE TABLE public.AppUser (
     , Username varchar(50) not null unique
     , Email varchar(255) not null unique
     , GoogleId varchar(255)
-    , ApplekjId varchar(255)
+    , AppleId varchar(255)
     , PasswordHash bytea 
     , PasswordSalt bytea
     , CreateDttm timestamp default CURRENT_TIMESTAMP

@@ -1,12 +1,12 @@
 ﻿namespace ProcrastiPlate.Contracts.Recipes;
 
-public record RecipeListReponse(
+public record RecipeListResponse(
     int RecipeId,
     string RecipeName,
     string? RecipeDescription,
     int? TotalTimeMinutes,
     int? Servings,
-    string AuthorName, // User.FullName
+    //string AuthorName, // User.FullName
     int IngredientCount,
-    DateTime CreatedDttm
+    DateTime CreateDttm
 );

@@ -10,8 +10,8 @@
         public int? CookTimeMinutes { get; set; }
         public int? Servings { get; set; }
         public string? Instructions { get; set; }
-        public DateTime CreatedDttm { get; set; }
-        public DateTime UpdatedDttm { get; set; }
+        public DateTime CreateDttm { get; set; }
+        public DateTime UpdateDttm { get; set; }
 
         // Navigation properties 
         public User User { get; set; } = null!;

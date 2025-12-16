@@ -3,6 +3,7 @@
 namespace ProcrastiPlate.Contracts.Recipes;
 
 public record RecipeStepRequest(
+
     [Range(1, 100)] int StepNumber,
     [Required, MaxLength(2000)] string Instruction,
     [Range(0, 1440)] int DurationMinutes,
