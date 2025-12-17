@@ -4,6 +4,7 @@ using ProcrastiPlate.Core.Configuration;
 using ProcrastiPlate.Core.Interfaces.Repositories;
 using ProcrastiPlate.Core.Interfaces.Services;
 using ProcrastiPlate.Core.Services;
+using ProcrastiPlate.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +35,12 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 builder.Services.AddTransient<IRecipeService, RecipeService>();
 builder.Services.AddTransient<IRecipeRepository, RecipeRepository>();
+
+builder.Services.AddTransient<IIngredientService, IngredientService>();
+builder.Services.AddTransient<IIngredientRepository, IngredientRepository>();
 
 var app = builder.Build();
 

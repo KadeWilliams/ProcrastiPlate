@@ -3,7 +3,8 @@ namespace ProcrastiPlate.Core.Models;
 public class RecipeIngredient
 {
     public int RecipeId { get; set; }
-    public int IngredientId { get; set; }
+    public int? IngredientId { get; set; }
+    public int? UserIngredientId { get; set; }
     public string UnitTypeCd { get; set; } = string.Empty;
     public decimal Quantity { get; set; }
     public string? Notes { get; set; }
@@ -12,6 +13,9 @@ public class RecipeIngredient
 
     // Navigation properties
     public Recipe Recipe { get; set; } = null!;
-    public Ingredient Ingredient { get; set; } = null!;
+    public Ingredient? Ingredient { get; set; } = null!;
+    public UserIngredient? UserIngredient { get; set; } = null!;
     public UnitType UnitType { get; set; } = null!;
+
+    public string IngredientName => Ingredient?.IngredientName ?? UserIngredient?.IngredientName ?? "Unknown";
 }

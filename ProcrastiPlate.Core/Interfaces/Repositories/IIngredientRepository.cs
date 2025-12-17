@@ -1,7 +1,11 @@
+using ProcrastiPlate.Core.Models;
+
 namespace ProcrastiPlate.Core.Interfaces.Repositories;
 
 public interface IIngredientRepository
 {
+    Task<IEnumerable<Ingredient>> GetAllIngredientsAsync();
+    Task<IEnumerable<UserIngredient>> GetAllUserIngredientsByIdAsync(int userId);
     //Task<IEnumerable<Recipe>> GetAllRecipeIngredientsAsync(int recipeId, int userId);
     //Task<Recipe?> GetIngredientByIdAsync(int recipeId, int ingredientId, int userId);
     //Task<Recipe> CreateRecipeIngredientAsync(CreateRecipeIngredientRequest request, int userId);

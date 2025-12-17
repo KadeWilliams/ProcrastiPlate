@@ -3,9 +3,11 @@ namespace ProcrastiPlate.Core.Models;
 public class Ingredient
 {
     public int IngredientId { get; set; }
-    public string IngredientName { get; set; }
+    public string IngredientName { get; set; } = string.Empty;
+    public string? Category { get; set; }
     public bool IsExotic { get; set; }
     public bool IsPerishable { get; set; }
+    public string[]? Aliases { get; set; }
     public DateTime CreateDttm { get; set; }
     public DateTime UpdateDttm { get; set; }
 

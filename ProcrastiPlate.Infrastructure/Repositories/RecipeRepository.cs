@@ -50,31 +50,27 @@ public class RecipeRepository : IRecipeRepository
                     ,u.CreateDttm
                     ,ri.RecipeId 
                     ,ri.IngredientId
+                    ,ri.UserIngredientId
                     ,ri.UnitTypeCd
                     ,ri.Quantity
                     ,ri.Notes
                     ,ri.DisplayOrder
                     ,ri.CreateDttm
                     ,ri.UpdateDttm
-                    ,i.IngredientId
-                    ,i.IngredientName
-                    ,i.IsExotic
-                    ,i.IsPerishable
                     ,ut.UnitTypeCd
-                    ,ut.UnitDescription
+                    ,ut.UnitTypeDescription
                 FROM public.Recipe r
                     INNER JOIN public.AppUser u ON r.UserId = u.UserId
                     LEFT JOIN public.RecipeIngredient ri ON r.RecipeId = ri.RecipeId
-                    LEFT JOIN public.Ingredient i ON ri.IngredientId = i.IngredientId
                     LEFT JOIN reference.UnitType ut on ri.UnitTypeCd = ut.UnitTypeCd
                 WHERE r.RecipeId = @RecipeId AND u.UserId = @UserId
                 ORDER BY ri.DisplayOrder";
 
             var recipeDictionary = new Dictionary<int, Recipe>();
 
-            await conn.QueryAsync<Recipe, User, RecipeIngredient, Ingredient, UnitType, Recipe>(
+            await conn.QueryAsync<Recipe, User, RecipeIngredient, UnitType, Recipe>(
                 sql,
-                (recipe, user, recipeIngredient, ingredient, unitType) =>
+                (recipe, user, recipeIngredient, unitType) =>
                 {
                     if (!recipeDictionary.TryGetValue(recipe.RecipeId, out var recipeEntry))
                     {
@@ -84,9 +80,8 @@ public class RecipeRepository : IRecipeRepository
                         recipeDictionary.Add(recipe.RecipeId, recipeEntry);
                     }
 
-                    if (recipeIngredient != null && ingredient != null && unitType != null)
+                    if (recipeIngredient != null && unitType != null)
                     {
-                        recipeIngredient.Ingredient = ingredient;
                         recipeIngredient.UnitType = unitType;
                         recipeEntry.RecipeIngredients.Add(recipeIngredient);
                     }
@@ -94,9 +89,12 @@ public class RecipeRepository : IRecipeRepository
                     return recipeEntry;
                 },
                 new { RecipeId = recipeId, UserId = userId },
-                splitOn: "UserId,RecipeId,IngredientId,UnitTypeCd"
+                splitOn: "UserId,RecipeId,UnitTypeCd"
             );
             var result = recipeDictionary.Values.FirstOrDefault();
+            if (result == null) return null;
+
+            result.RecipeIngredients = await GetRecipeIngredientsAsync(recipeId);
 
             if (result != null && includeSteps)
             {
@@ -121,6 +119,89 @@ public class RecipeRepository : IRecipeRepository
                 result.RecipeSteps = steps.ToList();
             }
             return result;
+        }
+    }
+    private async Task<List<RecipeIngredient>> GetRecipeIngredientsAsync(
+        int recipeId
+    )
+    {
+        using (var conn = _connection.GetConnection())
+        {
+            var recipeIngredients = new List<RecipeIngredient>();
+
+            const string userIngredientsSQL = @"
+                SELECT
+                    ri.RecipeId
+                    , ri.IngredientId
+                    , ri.UserIngredientId
+                    , ri.UnitTypeCd
+                    , ri.Quantity
+                    , ri.Notes
+                    , ri.DisplayOrder
+                    , ri.CreateDttm
+                    , ui.UserIngredientId
+                    , ui.IngredientName
+                    , ui.IsExotic
+                    , ui.IsPerishable
+                    , ut.UnitTypeCd
+                    , ut.UnitTypeDescription
+                FROM public.RecipeIngredient ri
+                    INNER JOIN public.UserIngredient ui on ri.UserIngredientId = ui.UserIngredientId
+                    INNER JOIN reference.UnitType ut on ri.UnitTypeCd = ut.UnitTypeCd
+                WHERE ri.RecipeId = @RecipeId
+                    AND ri.UserIngredientId IS NOT NULL";
+
+            var userIngredients = await conn.QueryAsync<RecipeIngredient, UserIngredient, UnitType, RecipeIngredient>(
+                userIngredientsSQL,
+                (recipeIngredient, userIngredient, unitType) =>
+                {
+                    recipeIngredient.UserIngredient = userIngredient;
+                    recipeIngredient.UnitType = unitType;
+                    return recipeIngredient;
+                },
+                new { RecipeId = recipeId },
+                splitOn: "UserIngredientId, UnitTypeCd"
+            );
+
+
+            recipeIngredients.AddRange(userIngredients);
+
+            const string ingredientsSQL = @"
+                SELECT
+                    ri.RecipeId
+                    , ri.IngredientId
+                    , ri.UserIngredientId
+                    , ri.UnitTypeCd
+                    , ri.Quantity
+                    , ri.Notes
+                    , ri.DisplayOrder
+                    , ri.CreateDttm
+                    , i.IngredientId
+                    , i.IngredientName
+                    , i.IsExotic
+                    , i.IsPerishable
+                    , ut.UnitTypeCd
+                    , ut.UnitTypeDescription
+                FROM public.RecipeIngredient ri
+                    INNER JOIN reference.Ingredient i on ri.IngredientId = i.IngredientId
+                    INNER JOIN reference.UnitType ut on ri.UnitTypeCd = ut.UnitTypeCd
+                WHERE ri.RecipeId = @RecipeId";
+
+            var ingredients = await conn.QueryAsync<RecipeIngredient, Ingredient, UnitType, RecipeIngredient>(
+                ingredientsSQL,
+                (recipeIngredient, ingredient, unitType) =>
+                {
+                    recipeIngredient.Ingredient = ingredient;
+                    recipeIngredient.UnitType = unitType;
+                    return recipeIngredient;
+                },
+                new { RecipeId = recipeId },
+                splitOn: "UserIngredientId, UnitTypeCd"
+            );
+
+            recipeIngredients.AddRange(ingredients);
+
+            return recipeIngredients;
         }
     }
     public async Task<Recipe> CreateAsync(Recipe recipe, int userId)
@@ -150,12 +231,13 @@ public class RecipeRepository : IRecipeRepository
                     foreach (var ingredient in recipe.RecipeIngredients)
                     {
                         await conn.ExecuteAsync(
-                            @"INSERT INTO RecipeIngredient (RecipeId, IngredientId, UnitTypeCd, Quantity, Notes, DisplayOrder)
-                          VALUES (@RecipeId, @IngredientId, @UnitTypeCd, @Quantity, @Notes, @DisplayOrder)",
+                            @"INSERT INTO RecipeIngredient (RecipeId, IngredientId, UserIngredientId, UnitTypeCd, Quantity, Notes, DisplayOrder)
+                          VALUES (@RecipeId, @IngredientId, @UserIngredientId, @UnitTypeCd, @Quantity, @Notes, @DisplayOrder)",
                             new
                             {
                                 RecipeId = recipeId,
                                 ingredient.IngredientId,
+                                ingredient.UserIngredientId,
                                 ingredient.UnitTypeCd,
                                 ingredient.Quantity,
                                 ingredient.Notes,
@@ -256,8 +338,16 @@ public class RecipeRepository : IRecipeRepository
         using (var conn = _connection.GetConnection())
         {
             const string deleteRecipeSQL = @"
+                DELETE FROM RecipeIngredient
+                USING Recipe 
+                WHERE RecipeId = @RecipeId AND UserId = @UserId;
+
+                DELETE FROM RecipeSteps 
+                USING Recipe 
+                WHERE RecipeId = @RecipeId AND UserId = @UserId;
+
                 DELETE FROM Recipe
-                WHERE RecipeId = @RecipeId AND UserId = @UserId";
+                WHERE RecipeId = @RecipeId AND UserId = @UserId;";
 
             var rowsAffected = await conn.ExecuteAsync(
                 deleteRecipeSQL,

@@ -49,6 +49,19 @@ UnitType {
 	string UnitTypeCd
 	string Description
 }
+Category {
+	string CategoryCd 
+	string CategoryDescription
+}
+Ingredient {
+	int IngredientId
+	string CategoryCd
+	int SeasonCd
+	string IngredientName
+	bytea IngredientImage
+	bit IsExotic
+	bit IsPerishable
+}
 
 %% Main Tables %%
 Author {  
@@ -95,10 +108,12 @@ RecipeStep {
 	string TemperatureUnit
 	varbinary StepImage  
 }
-Ingredient {
-	int IngredientId
+UserIngredient {
+	int UserIngredientId
+	int UserId
+	string CategoryCd
 	int SeasonCd
-	string Name
+	string IngredientName
 	varbinary IngredientImage
 	bit IsExotic
 	bit IsParishable

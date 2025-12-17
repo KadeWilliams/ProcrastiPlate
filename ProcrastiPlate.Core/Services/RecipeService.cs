@@ -26,7 +26,12 @@ public class RecipeService : IRecipeService
         if (recipe == null)
             return null;
 
-        return MapToListResponseAsync(recipe);
+        return MapToListResponse(recipe);
+    }
+    public async Task<RecipeDetailResponse> GetRecipeAsync(int recipeId, int userId, bool includeSteps)
+    {
+        var recipe = await _recipeRepository.GetByIdAsync(recipeId, userId, includeSteps);
+        return MapToDetailResponse(recipe);
     }
     public async Task<RecipeDetailResponse> CreateRecipeAsync(CreateRecipeRequest request, int userId)
     {
@@ -42,17 +47,14 @@ public class RecipeService : IRecipeService
         }
 
         // validate ingredients exist 
-        /*
-        foreach (var ingredientRequest in request.Ingredients)
-        {
-            var ingredient = await _ingredientRepository.GetByIdAsync(ingredientRequest.IngredientId);
+        // probably better to move this off into the ingredient service and then call it before we get in this method 
+        //foreach (var ingredientRequest in request.Ingredients)
+        //{
+        //    var ingredient = await _ingredientService.GetByIdAsync(ingredientRequest.IngredientId);
 
-            if (ingredient == null)
-                throw new ValidationException($"Ingredient with ID {ingredientRequest.IngredientId} not found");
-
-
-        }
-        */
+        //    if (ingredient == null)
+        //        throw new ValidationException($"Ingredient with ID {ingredientRequest.IngredientId} not found");
+        //}
 
         // Create recipe
         var recipe = new Recipe
@@ -81,6 +83,7 @@ public class RecipeService : IRecipeService
         {
             RecipeId = createdRecipe.RecipeId,
             IngredientId = ing.IngredientId,
+            UserIngredientId = ing.UserIngredientId,
             UnitTypeCd = ing.UnitTypeCd,
             Quantity = ing.Quantity,
             Notes = ing.Notes,
@@ -94,7 +97,7 @@ public class RecipeService : IRecipeService
         // get the full recipe back with User, Ingredients, etc. loaded 
         var completedRecipe = await _recipeRepository.GetByIdAsync(createdRecipe.RecipeId, userId, true);
 
-        return MapToDetailResponseAsync(completedRecipe);
+        return MapToDetailResponse(completedRecipe);
     }
     public async Task<RecipeDetailResponse> UpdateRecipeAsync(int recipeId, UpdateRecipeRequest request, int userId)
     {
@@ -102,17 +105,15 @@ public class RecipeService : IRecipeService
         if (success)
         {
             var updatedRecipe = await _recipeRepository.GetByIdAsync(recipeId, userId, true);
-            return MapToDetailResponseAsync(updatedRecipe);
+            return MapToDetailResponse(updatedRecipe);
         }
         return null;
     }
     public async Task<bool> DeleteRecipeAsync(int recipeId, int userId)
     {
-        // todo figure out the best way to handle deletes for child relationship tables 
-        //var ingredientDeleteSuccess = _recipeRepository.DeleteRecipeIngredientAsync();
         return await _recipeRepository.DeleteRecipeAsync(recipeId, userId);
     }
-    private RecipeDetailResponse MapToDetailResponseAsync(Recipe? recipe)
+    private RecipeDetailResponse MapToDetailResponse(Recipe? recipe)
     {
         return new RecipeDetailResponse(
             recipe.RecipeId,
@@ -130,7 +131,8 @@ public class RecipeService : IRecipeService
             ),
             recipe.RecipeIngredients.Select(ri => new RecipeIngredientResponse(
                 ri.IngredientId,
-                ri.Ingredient.IngredientName,
+                ri.UserIngredientId,
+                ri.Ingredient.IngredientName ?? ri.UserIngredient.IngredientName,
                 ri.Quantity,
                 ri.UnitTypeCd,
                 ri.UnitType.UnitTypeDescription,
@@ -144,7 +146,7 @@ public class RecipeService : IRecipeService
             recipe.UpdateDttm
         );
     }
-    private List<RecipeListResponse> MapToListResponseAsync(IEnumerable<Recipe> recipes)
+    private List<RecipeListResponse> MapToListResponse(IEnumerable<Recipe> recipes)
     {
         var recipeListResponse = new List<RecipeListResponse>();
         foreach (var recipe in recipes)

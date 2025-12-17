@@ -14,7 +14,21 @@ GRANT ALL ON SCHEMA reference TO public;
 
 CREATE TABLE reference.UnitType (
     UnitTypeCd varchar(20) Primary Key
-    , UnitDescription varchar(100) not null
+    , UnitTypeDescription varchar(100) not null
+);
+
+CREATE TABLE reference.Category (
+    Category varchar(20) PRIMARY KEY
+    , CategoryDescription varchar(100) not null
+);
+
+CREATE TABLE reference.Ingredient (
+    IngredientId SERIAL primary key
+    , IngredientName varchar(200) not null
+    , Category varchar(20) REFERENCES reference.Category(Category)
+    , IsExotic BOOLEAN DEFAULT FALSE
+    , IsPerishable BOOLEAN DEFAULT FALSE
+    , CreateDttm timestamp default CURRENT_TIMESTAMP
 );
 
 -- Public/Main Tables
@@ -33,14 +47,17 @@ CREATE TABLE public.AppUser (
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
 );
 
-CREATE TABLE public.Ingredient (
-    IngredientId SERIAL Primary Key
+CREATE TABLE public.UserIngredient (
+    UserIngredientId SERIAL Primary Key
+    , UserId int not null REFERENCES AppUser(UserId)
     , IngredientName varchar(200) not null
+    , Category varchar(20) REFERENCES reference.Category(Category)
     , IsExotic BOOLEAN DEFAULT FALSE
     , IsPerishable BOOLEAN DEFAULT FALSE
     , IngredientImage bytea 
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
+    , UNIQUE(UserId, IngredientName) -- User can't create duplicates
 );
 
 CREATE TABLE public.Recipe (
@@ -69,12 +86,17 @@ CREATE TABLE public.RecipeStep (
 
 CREATE TABLE public.RecipeIngredient (
     RecipeId int not null references Recipe(RecipeId)
-    , IngredientId int not null references Ingredient(IngredientId)
+    , IngredientId int references reference.Ingredient(IngredientId)
+    , UserIngredientId int references UserIngredient(UserIngredientId)
     , UnitTypeCd varchar(20) not null references reference.UnitType(UnitTypeCd)
     , Quantity decimal(10, 3) not null
     , Notes varchar(500) -- e.g. "finely chopped", "to taste"
     , DisplayOrder int DEFAULT 0
     , PRIMARY KEY (RecipeId, IngredientId, UnitTypeCd)
+    , CHECK (
+        (IngredientId IS NOT NULL AND UserIngredientId IS NULL) OR
+        (IngredientId IS NULL AND UserIngredientId IS NOT NULL) 
+    ) -- Must reference one or the other not both 
     , CreateDttm timestamp default CURRENT_TIMESTAMP
     , UpdateDttm timestamp default CURRENT_TIMESTAMP
 );
@@ -82,14 +104,15 @@ CREATE TABLE public.RecipeIngredient (
 -- Indexes for Performance 
 CREATE INDEX idx_RecipeUserId on Recipe(UserId);
 CREATE INDEX idx_RecipeName on Recipe(RecipeName);
-CREATE INDEX idx_IngredientName on Ingredient(IngredientName);
+CREATE INDEX idx_IngredientName on reference.Ingredient(IngredientName);
+CREATE INDEX idx_UserIngredientName on UserIngredient(IngredientName);
 CREATE INDEX idx_RecipeIngredientRecipe on RecipeIngredient(RecipeId);
 CREATE INDEX idx_RecipeIngredientIngredient on RecipeIngredient(IngredientId);
 
 -- Seed Data for Quick Testing 
 
 -- Unit Types 
-INSERT INTO reference.UnitType (UnitTypeCd, UnitDescription)
+INSERT INTO reference.UnitType (UnitTypeCd, UnitTypeDescription)
 VALUES 
 ('CUP', 'Cup'),
 ('TBSP', 'Tablespoon'),
@@ -115,7 +138,7 @@ VALUES
 ('Test', 'User', 'testuser', 'test@example.com', decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex'), decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex'));
 
 -- Sample Ingredients
-INSERT INTO Ingredient (IngredientName, IsExotic, IsPerishable)
+INSERT INTO reference.Ingredient (IngredientName, IsExotic, IsPerishable)
 VALUES
 ('Spaghetti', FALSE, FALSE),
 ('All-Purpose Flour', FALSE, FALSE),
@@ -134,6 +157,10 @@ VALUES
 ('Mozzarella Cheese', FALSE, TRUE),
 ('Parmesan Cheese', FALSE, TRUE);
 
+INSERT INTO public.UserIngredient (UserId, IngredientName)
+VALUES
+(1, 'Random Ingredient');
+
 -- Sample Recipe
 INSERT INTO Recipe (UserId, RecipeName, RecipeDescription, PrepTimeMinutes, CookTimeMinutes, Servings) 
 VALUES
@@ -149,9 +176,9 @@ VALUES
 (1, 4, 'Add red pepper flakes and parsley', null, null, null, null),
 (1, 5, 'Serve with parmesan cheese', null, null, null, null);
 
-INSERT INTO RecipeIngredient (RecipeId, IngredientId, UnitTypeCd, Quantity, Notes, DisplayOrder)
+INSERT INTO RecipeIngredient (RecipeId, IngredientId, UserIngredientId, UnitTypeCd, Quantity, Notes, DisplayOrder)
 VALUES
-(1,1,'LB', 1, null, 1),
-(1,6,'CUP', 0.5, null, 2),
-(1,10,'CLOVE', 6.0, 'thinly sliced', 3),
-(1,4,'TASTE', 6.0, 'thinly sliced', 3);
+(1,1, null, 'LB', 1, null, 1),
+(1,6, null, 'CUP', 0.5, null, 2),
+(1,10, null, 'CLOVE', 6.0, 'thinly sliced', 3),
+(1,4, null, 'TASTE', 6.0, 'thinly sliced', 3);

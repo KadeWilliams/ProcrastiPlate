@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProcrastiPlate.Contracts.Recipes;
-using ProcrastiPlate.Core.Interfaces.Repositories;
 using ProcrastiPlate.Core.Interfaces.Services;
 using ProcrastiPlate.Core.Models;
 
@@ -11,17 +9,15 @@ namespace ProcrastiPlate.Api.Controllers;
 [Route("api/[controller]")]
 public class RecipesController : ControllerBase
 {
-    private readonly IRecipeRepository _recipeRepository;
     private readonly IRecipeService _recipeService;
+    //private readonly IIngredientService _ingredientService; // may or may not need this tbd
     private readonly ILogger<RecipesController> _logger;
 
     public RecipesController(
-        IRecipeRepository recipeRepository,
         IRecipeService recipeService,
         ILogger<RecipesController> logger
     )
     {
-        _recipeRepository = recipeRepository;
         _recipeService = recipeService;
         _logger = logger;
     }
@@ -49,14 +45,14 @@ public class RecipesController : ControllerBase
 
     // GET: api/recipes/5
     [HttpGet("{recipeId}")]
-    public async Task<ActionResult<Recipe>> GetRecipe(int recipeId)
+    public async Task<ActionResult<RecipeDetailResponse>> GetRecipe(int recipeId, bool includeSteps = false)
     {
         try
         {
             // TODO: Get real user ID from auth token
             var userId = 1;
 
-            var recipe = await _recipeRepository.GetByIdAsync(recipeId, userId);
+            var recipe = await _recipeService.GetRecipeAsync(recipeId, userId, includeSteps);
             if (recipe == null)
             {
                 return NotFound($"Recipe with ID {recipeId} not found");
@@ -75,7 +71,7 @@ public class RecipesController : ControllerBase
     /// Create a new recipe
     /// </summary>
     [HttpPost]
-    [Authorize]
+    // [Authorize] remove this until we actually need to authorize
     [ProducesResponseType(typeof(RecipeDetailResponse), StatusCodes.Status201Created)]
     public async Task<ActionResult<RecipeDetailResponse>> CreateRecipe([FromBody] CreateRecipeRequest request)
     {

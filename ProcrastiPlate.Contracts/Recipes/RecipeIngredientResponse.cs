@@ -1,7 +1,8 @@
 ﻿namespace ProcrastiPlate.Contracts.Recipes;
 
 public record RecipeIngredientResponse(
-    int IngredientId,
+    int? IngredientId,
+    int? UserIngredientId,
     string IngredientName,
     decimal Quantity,
     string UnitTypeCd,
